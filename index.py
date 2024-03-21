@@ -29,9 +29,7 @@ class Background:
 
 class Character:
   def __init__(self, position, scale) -> None:
-    self.action = 0;
-    self.frame = 0;
-    self.update_time = 0;
+    self.idle();
 
     self.position = position
     self.scale = scale
@@ -55,6 +53,11 @@ class Character:
     landing_image = pygame.transform.scale(landing_image, (landing_image.get_width() * self.scale, landing_image.get_height() * self.scale));
     self.animation_list.append([landing_image])
 
+  def idle(self):
+    self.action = 0;
+    self.update_time = 0;
+    self.frame = 0;
+
   def draw(self):
     self.update();
     screen.blit(self.animation_list[self.action][self.frame], self.position)
@@ -77,6 +80,9 @@ while gameIsRunning:
   runner.draw();
 
   for event in pygame.event.get():
+    if event.type == pygame.K_SPACE:
+      runner.jump();
+
     if event.type == pygame.QUIT:
       gameIsRunning = False
 
