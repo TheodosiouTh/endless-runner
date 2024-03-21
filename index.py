@@ -47,6 +47,14 @@ class Character:
       temp_image_list.append(temp_image);
     self.animation_list.append(temp_image_list);
 
+    jump_image = pygame.image.load(f"./assets/character/jump/0.png");
+    jump_image = pygame.transform.scale(jump_image, (jump_image.get_width() * self.scale, jump_image.get_height() * self.scale));
+    self.animation_list.append([jump_image]);
+
+    landing_image = pygame.image.load(f"./assets/character/landing/0.png");
+    landing_image = pygame.transform.scale(landing_image, (landing_image.get_width() * self.scale, landing_image.get_height() * self.scale));
+    self.animation_list.append([landing_image])
+
   def draw(self):
     self.update();
     screen.blit(self.animation_list[self.action][self.frame], self.position)
