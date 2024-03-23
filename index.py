@@ -1,6 +1,8 @@
 import pygame;
 import random;
 
+pygame.init();
+
 SCREEN_WIDTH = 600;
 SCREEN_HEIGHT = 400;
 
@@ -11,6 +13,9 @@ GRAVITY = 1
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner Man')
+
+FONT = pygame.font.SysFont('Times New Roman', 26);
+TEXT_COLOR = (0, 0, 0)
 
 
 class Background:
@@ -132,22 +137,29 @@ class Bolder:
   def draw(self):
     if not game_over:
       self.position = (self.position[0] - self.speed, self.position[1]);
-    
-      if self.position[0] < -100:
-        self.speed = random.randint(5,9);
-        self.position = self.original_position;
-      
       self.update_rect();
     screen.blit(self.image, self.position);
 
+class Text(pygame.sprite.Sprite):
+  def __init__(self, position) -> None:
+    pygame.sprite.Sprite.__init__(self);
+    self.score = 0;
+    self.image = FONT.render(str(self.score), True, TEXT_COLOR);
+    self.rect = self.image.get_rect();
+    self.rect.center = position
+    
+  def update(self):
+    self.image = FONT.render(str(self.score), True, TEXT_COLOR);
+    screen.blit(self.image, self.rect.center)
 
 
 background = Background();
 
 runner = Character((200, 280), 2, 15)
-
-
 bolder = Bolder();
+
+score_text = Text((300,50));
+score_updated = False;
 
 game_over = False
 gameIsRunning = True 
@@ -166,6 +178,16 @@ while gameIsRunning:
   if runner.rect.colliderect(bolder.rect):
     runner.idleAnimation();
     game_over = True;
+  
+  if bolder.position[0] <= 100 and not score_updated:
+    score_updated = True;
+    score_text.score += 1;
+  elif bolder.rect.right < 0 and not game_over:
+    score_updated = False;
+    bolder.speed = random.randint(5,9);
+    bolder.position = bolder.original_position;
+  score_text.update();
+
   
   for event in pygame.event.get():
     if event.type == pygame.KEYDOWN and not game_over:
