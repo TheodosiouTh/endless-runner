@@ -21,11 +21,12 @@ class Background:
     self.REMAINING_IMAGE_OFFSET = self.BACKGROUND_IMAGE.get_width() - SCREEN_WIDTH;
 
   def draw(self) -> None:
-    if self.background_shift_offset >= self.BACKGROUND_IMAGE.get_width():
-      self.background_shift_offset = 0
-    
-    self.background_shift_offset += 1;
-    
+    if not game_over:
+      if self.background_shift_offset >= self.BACKGROUND_IMAGE.get_width():
+        self.background_shift_offset = 0
+      
+      self.background_shift_offset += 1;
+      
     screen.blit(self.BACKGROUND_IMAGE,(0 - self.REMAINING_IMAGE_OFFSET - self.background_shift_offset,0));
     screen.blit(self.BACKGROUND_IMAGE,(SCREEN_WIDTH - self.background_shift_offset,0));
 
@@ -50,6 +51,7 @@ class Character:
       temp_image = pygame.transform.scale(temp_image, (temp_image.get_width() * self.scale, temp_image.get_height() * self.scale));
       temp_image_list.append(temp_image);
     self.animation_list.append(temp_image_list);
+    self.image = self.animation_list[self.action][self.frame];
 
     jump_image = pygame.image.load(f"./assets/character/jump/0.png");
     jump_image = pygame.transform.scale(jump_image, (jump_image.get_width() * self.scale, jump_image.get_height() * self.scale));
@@ -74,6 +76,10 @@ class Character:
     self.update_time = 0;
     self.frame = 0;
     
+  def update_rect(self):
+    self.rect = self.image.get_rect();
+    self.rect.center = self.position
+
   def jump(self):
     self.position = (self.position[0], self.position[1] - self.velocity);
     self.velocity -= GRAVITY;
@@ -89,8 +95,12 @@ class Character:
 
 
   def draw(self):
-    self.update();
-    screen.blit(self.animation_list[self.action][self.frame], self.position)
+    if not game_over:
+      self.update();
+      self.image = self.animation_list[self.action][self.frame]
+      self.update_rect();
+
+    screen.blit(self.image, self.position)
 
   def update(self):
     animation_cooldown = 100;
@@ -105,16 +115,26 @@ class Bolder:
     
     self.original_position = (650, 300);
     self.position = self.original_position
+
+    self.update_rect();
     
     self.angle = 0;
     self.update_time = 0;
     self.speed = 5
 
+
+  def update_rect(self):
+    self.rect = self.image.get_rect();
+    self.rect.center = self.position
+
   def draw(self):
-    self.position = (self.position[0] - self.speed, self.position[1]);
+    if not game_over:
+      self.position = (self.position[0] - self.speed, self.position[1]);
     
-    if self.position[0] < -100:
-      self.position = self.original_position;
+      if self.position[0] < -100:
+        self.position = self.original_position;
+      
+      self.update_rect();
     screen.blit(self.image, self.position);
 
 
@@ -126,6 +146,7 @@ runner = Character((200, 280), 2, 15)
 
 bolder = Bolder();
 
+game_over = False
 gameIsRunning = True 
 while gameIsRunning:
   clock.tick(FPS)
@@ -138,9 +159,13 @@ while gameIsRunning:
 
   if runner.is_jumping: 
     runner.jump()
+
+  if runner.rect.colliderect(bolder.rect):
+    runner.idleAnimation();
+    game_over = True;
   
   for event in pygame.event.get():
-    if event.type == pygame.KEYDOWN:
+    if event.type == pygame.KEYDOWN and not game_over:
       if event.key == pygame.K_SPACE:
         runner.jumpAnimation();
         runner.is_jumping = True
