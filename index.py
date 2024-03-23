@@ -98,8 +98,33 @@ class Character:
       self.update_time = pygame.time.get_ticks()
       self.frame = 0 if self.frame == len(self.animation_list[self.action]) - 1 else self.frame + 1 
 
+
+class Bolder:
+  def __init__(self) -> None:
+    self.image = pygame.image.load("./assets/environment/bolder.png").convert_alpha();
+    
+    self.original_position = (650, 300);
+    self.position = self.original_position
+    
+    self.angle = 0;
+    self.update_time = 0;
+    self.speed = 5
+
+  def draw(self):
+    self.position = (self.position[0] - self.speed, self.position[1]);
+    
+    if self.position[0] < -100:
+      self.position = self.original_position;
+    screen.blit(self.image, self.position);
+
+
+
 background = Background();
+
 runner = Character((200, 280), 2, 15)
+
+
+bolder = Bolder();
 
 gameIsRunning = True 
 while gameIsRunning:
@@ -109,7 +134,9 @@ while gameIsRunning:
 
   runner.draw();
 
-  if runner.is_jumping:
+  bolder.draw();
+
+  if runner.is_jumping: 
     runner.jump()
   
   for event in pygame.event.get():
