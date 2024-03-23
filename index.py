@@ -126,7 +126,14 @@ class Character:
 
 class Bolder:
   def __init__(self) -> None:
-    self.image = pygame.image.load("./assets/environment/bolder.png").convert_alpha();
+    self.bolder_images = []
+    self.current_color = 0;
+
+    for i in range(5):
+      temp_image =  pygame.image.load(f"./assets/environment/bolders/{i}.png").convert_alpha();
+      self.bolder_images.append(temp_image)
+
+    self.image = self.bolder_images[self.current_color];
     
     self.original_position = (650, 300);
     self.position = self.original_position
@@ -138,7 +145,13 @@ class Bolder:
     self.speed = 5
 
   def reset(self):
+    self.random_color();
     self.position = self.original_position;
+    self.speed = random.randint(5,9)
+
+  def random_color(self):
+    self.current_color = random.randint(0, 4);
+    self.image = self.bolder_images[self.current_color];
 
   def update_rect(self):
     self.rect = self.image.get_rect();
@@ -205,8 +218,7 @@ while gameIsRunning:
     score += 1;
   elif bolder.rect.right < 0 and not game_over:
     score_updated = False;
-    bolder.speed = random.randint(5,9);
-    bolder.position = bolder.original_position;
+    bolder.reset();
 
   if not game_over:
     score_text.update(str(score));
