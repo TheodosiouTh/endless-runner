@@ -15,7 +15,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner Man')
 
 FONT = pygame.font.SysFont('Times New Roman', 26);
-TEXT_COLOR = (0, 0, 0)
 
 
 class Background:
@@ -141,15 +140,18 @@ class Bolder:
     screen.blit(self.image, self.position);
 
 class Text(pygame.sprite.Sprite):
-  def __init__(self, position) -> None:
+  def __init__(self, position, text, color) -> None:
     pygame.sprite.Sprite.__init__(self);
-    self.score = 0;
-    self.image = FONT.render(str(self.score), True, TEXT_COLOR);
+    self.text = text
+    self.color = color
+    self.image = FONT.render(self.text, True, self.color);
     self.rect = self.image.get_rect();
     self.rect.center = position
     
-  def update(self):
-    self.image = FONT.render(str(self.score), True, TEXT_COLOR);
+  def update(self, text = ""):
+    if text: 
+      self.text = text
+      self.image = FONT.render(self.text, True, self.color);
     screen.blit(self.image, self.rect.center)
 
 
@@ -158,10 +160,15 @@ background = Background();
 runner = Character((200, 280), 2, 15)
 bolder = Bolder();
 
-score_text = Text((300,50));
+score = 0
+SCORE_COLOR = (0, 0, 0)
+score_text = Text((300,50), str(score), SCORE_COLOR);
 score_updated = False;
 
 game_over = False
+GAME_OVER_COLOR = (230, 0, 0)
+game_over_text = Text((225,50),"GAME OVER", GAME_OVER_COLOR)
+
 gameIsRunning = True 
 while gameIsRunning:
   clock.tick(FPS)
@@ -181,14 +188,17 @@ while gameIsRunning:
   
   if bolder.position[0] <= 100 and not score_updated:
     score_updated = True;
-    score_text.score += 1;
+    score += 1;
   elif bolder.rect.right < 0 and not game_over:
     score_updated = False;
     bolder.speed = random.randint(5,9);
     bolder.position = bolder.original_position;
-  score_text.update();
 
-  
+  if not game_over:
+    score_text.update(str(score));
+  else: 
+    game_over_text.update();
+
   for event in pygame.event.get():
     if event.type == pygame.KEYDOWN and not game_over:
       if event.key == pygame.K_SPACE:
