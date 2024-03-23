@@ -82,17 +82,18 @@ class Character:
     self.rect.center = self.position
 
   def jump(self):
-    self.position = (self.position[0], self.position[1] - self.velocity);
-    self.velocity -= GRAVITY;
+    if not game_over:
+      self.position = (self.position[0], self.position[1] - self.velocity);
+      self.velocity -= GRAVITY;
 
-    should_switch_to_falling = self.velocity < 0;
-    if should_switch_to_falling:
-      self.fallAnimation();
-    
-    if self.velocity < -self.jump_height:
-      self.is_jumping = False;
-      self.velocity = self.jump_height;
-      self.idleAnimation()
+      should_switch_to_falling = self.velocity < 0;
+      if should_switch_to_falling:
+        self.fallAnimation();
+      
+      if self.velocity < -self.jump_height:
+        self.is_jumping = False;
+        self.velocity = self.jump_height;
+        self.idleAnimation()
 
 
   def draw(self):
