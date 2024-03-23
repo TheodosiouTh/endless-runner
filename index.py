@@ -6,6 +6,8 @@ SCREEN_HEIGHT = 400;
 FPS = 60;
 clock = pygame.time.Clock()
 
+GRAVITY = 1
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner Man')
 
@@ -28,11 +30,15 @@ class Background:
     screen.blit(self.BACKGROUND_IMAGE,(SCREEN_WIDTH - self.background_shift_offset,0));
 
 class Character:
-  def __init__(self, position, scale) -> None:
-    self.idle();
+  def __init__(self, position, scale, jump_height) -> None:
+    self.idleAnimation();
 
     self.position = position
     self.scale = scale
+
+    self.is_jumping = False;
+    self.jump_height = jump_height;
+    self.velocity = self.jump_height;
 
     self.animation_list = []
     self.load_animations();
@@ -53,10 +59,34 @@ class Character:
     landing_image = pygame.transform.scale(landing_image, (landing_image.get_width() * self.scale, landing_image.get_height() * self.scale));
     self.animation_list.append([landing_image])
 
-  def idle(self):
+  def idleAnimation(self):
     self.action = 0;
     self.update_time = 0;
     self.frame = 0;
+
+  def jumpAnimation(self):
+    self.action = 1;
+    self.update_time = 0;
+    self.frame = 0;
+  
+  def fallAnimation(self):
+    self.action = 2;
+    self.update_time = 0;
+    self.frame = 0;
+    
+  def jump(self):
+    self.position = (self.position[0], self.position[1] - self.velocity);
+    self.velocity -= GRAVITY;
+
+    should_switch_to_falling = self.velocity < 0;
+    if should_switch_to_falling:
+      self.fallAnimation();
+    
+    if self.velocity < -self.jump_height:
+      self.is_jumping = False;
+      self.velocity = self.jump_height;
+      self.idleAnimation()
+
 
   def draw(self):
     self.update();
@@ -69,7 +99,7 @@ class Character:
       self.frame = 0 if self.frame == len(self.animation_list[self.action]) - 1 else self.frame + 1 
 
 background = Background();
-runner = Character((200, 280), 2)
+runner = Character((200, 280), 2, 15)
 
 gameIsRunning = True 
 while gameIsRunning:
@@ -79,10 +109,14 @@ while gameIsRunning:
 
   runner.draw();
 
+  if runner.is_jumping:
+    runner.jump()
+  
   for event in pygame.event.get():
-    if event.type == pygame.K_SPACE:
-      runner.jump();
-
+    if event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_SPACE:
+        runner.jumpAnimation();
+        runner.is_jumping = True
     if event.type == pygame.QUIT:
       gameIsRunning = False
 
