@@ -121,7 +121,7 @@ class Bolder:
     
     self.angle = 0;
     self.update_time = 0;
-    self.speed = random.randint(5,11);
+    self.speed = 5
 
 
   def update_rect(self):
@@ -133,7 +133,7 @@ class Bolder:
       self.position = (self.position[0] - self.speed, self.position[1]);
     
       if self.position[0] < -100:
-        self.speed = random.randint(5,11);
+        self.speed = random.randint(5,9);
         self.position = self.original_position;
       
       self.update_rect();
