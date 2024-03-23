@@ -14,7 +14,8 @@ GRAVITY = 1
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Runner Man')
 
-FONT = pygame.font.SysFont('Times New Roman', 26);
+FONT_MAIN = pygame.font.SysFont('Times New Roman', 26);
+FONT_SUBTEXT = pygame.font.SysFont('Times New Roman', 18);
 
 
 class Background:
@@ -39,7 +40,8 @@ class Character:
   def __init__(self, position, scale, jump_height) -> None:
     self.idleAnimation();
 
-    self.position = position
+    self.orignal_position = position
+    self.position = self.orignal_position
     self.scale = scale
 
     self.is_jumping = False;
@@ -99,6 +101,13 @@ class Character:
         self.velocity = self.jump_height;
         self.idleAnimation()
 
+  def reset(self):
+    self.position = self.orignal_position;
+    self.is_jumping = False;
+    self.velocity = self.jump_height;
+    
+    self.idleAnimation();
+
 
   def draw(self):
     if not game_over:
@@ -128,6 +137,8 @@ class Bolder:
     self.update_time = 0;
     self.speed = 5
 
+  def reset(self):
+    self.position = self.original_position;
 
   def update_rect(self):
     self.rect = self.image.get_rect();
@@ -140,18 +151,20 @@ class Bolder:
     screen.blit(self.image, self.position);
 
 class Text(pygame.sprite.Sprite):
-  def __init__(self, position, text, color) -> None:
+  def __init__(self, position, text, color, font= FONT_MAIN) -> None:
     pygame.sprite.Sprite.__init__(self);
     self.text = text
     self.color = color
-    self.image = FONT.render(self.text, True, self.color);
+    self.font = font;
+
+    self.image = self.font.render(self.text, True, self.color);
     self.rect = self.image.get_rect();
     self.rect.center = position
     
   def update(self, text = ""):
     if text: 
       self.text = text
-      self.image = FONT.render(self.text, True, self.color);
+      self.image = self.font.render(self.text, True, self.color);
     screen.blit(self.image, self.rect.center)
 
 
@@ -168,6 +181,7 @@ score_updated = False;
 game_over = False
 GAME_OVER_COLOR = (230, 0, 0)
 game_over_text = Text((225,50),"GAME OVER", GAME_OVER_COLOR)
+restart_instruction_text = Text((170, 80),"To restart game please press the R key.", GAME_OVER_COLOR, FONT_SUBTEXT)
 
 gameIsRunning = True 
 while gameIsRunning:
@@ -198,12 +212,19 @@ while gameIsRunning:
     score_text.update(str(score));
   else: 
     game_over_text.update();
+    restart_instruction_text.update();
 
   for event in pygame.event.get():
-    if event.type == pygame.KEYDOWN and not game_over:
-      if event.key == pygame.K_SPACE:
+    if event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_SPACE and not game_over:
         runner.jumpAnimation();
         runner.is_jumping = True
+
+      if event.key == pygame.K_r and game_over:
+        bolder.reset();
+        runner.reset();
+        score = 0;
+        game_over = False;
     if event.type == pygame.QUIT:
       gameIsRunning = False
 
